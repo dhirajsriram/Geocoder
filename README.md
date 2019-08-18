@@ -17,7 +17,7 @@ npm install
 
 ## Serving Locally
 
-Once the packages have been installed you may serve both the application locally you may run `npm start` on the root directory of both the applications to serve them locally. Following are the ports the application run on
+Once the packages have been installed you may serve both the applications locally. You may run `npm start` on the root directory of both the applications to serve them locally. Following are the ports the application run on
 - Front-end :  [http://localhost:3000](http://localhost:3000)
 - Back-end :  [http://localhost:8081](http://localhost:8081)
 
@@ -26,12 +26,14 @@ Once the packages have been installed you may serve both the application locally
 ### Scripts
 
 `npm run start` - Serves the app locally on [http://localhost:3000](http://localhost:3000)
+
 `npm run test` - Runs the test scrips on the specific application
+
 `npm run build` - Builds a minified version of the frontend application. It correctly bundles React in production mode and optimizes the build for the best performance.
 
 ## Architecture
 
-The front-end and back-end application for geocoder are closely integrated. Any operation related to markers are handled in the back-end which is immediately fetched from the front-end have the latest version of the data available at all times. Following is an integrated architecture of the applications
+The front-end and back-end application for geocoder are closely integrated. Any operation related to markers are handled in the back-end which is immediately fetched from the front-end to have the latest version of the data available at all times. Following is an integrated architecture of the applications
 <p align="center"><img src="/geocoder.png"></p>
 
 ## Description
@@ -48,7 +50,7 @@ The map widget is loaded from the google maps script tag
 <script src="https://maps.googleapis.com/maps/api/js?key=API_KEY&libraries=places&sensor=false"></script>
 ```
 
-API_KEY is unique to the application which can be obtained from the [Google cloud](https://console.developers.google.com). The google maps API only works with an API_KEY. 
+**API_KEY** is unique to the application which can be obtained from the [Google cloud](https://console.developers.google.com). The google maps API only works with an API_KEY. 
 
 The map widget also enables the various interactions that the user makes with the application. Following are the features it provides
 - Autocomplete for the search bar
@@ -70,7 +72,9 @@ There are individual API's to handle the CRUD operations in the backend.
 The application was designed to be as granular as possible in terms of functionality. Separation of concerns was the goal while designing the project. The folder structure of the application is as follows
 
 `src/common` - Contains all the shared components such as error, Search, menu, map, etc
+
 `src/pages` - The different pages of the application are placed here. At present, the app runs on a single page **Home**
+
 `src/assets` - Images necessary for the application are present here.
 
 ### Application Design
@@ -88,6 +92,5 @@ The application was designed with a lifelike map in mind. The Map on the left re
 ## Error Handling
 
 The application handles errors gracefully. The application checks for the response status. If the status is not 200 an **Error component** is shown to the user with the data from the response.
-s
 
 
