@@ -246,7 +246,9 @@ class Home extends Component {
                                   <Grid item xs container direction="column" spacing={2}>
                                     <Grid item xs>
                                       {this.state.index !== i ? (
+                                        <div className="location-value">
                                         <Location marker={marker} />
+                                        </div>
                                       ) : (
                                         <form
                                           onSubmit={this.editMarker(marker)}

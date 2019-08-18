@@ -49,4 +49,29 @@ describe("Geocoder", () => {
     expect(div.length).toBeGreaterThan(0);
     appRender().unmount();
   });
+  it("Displays location when the value is set", () =>{
+    const wrapper = shallow(<Home />).dive();
+    let data =({"markers":[[{"formattedAddress":"Secaucus, NJ, USA","latitude":40.7895453,"longitude":-74.05652979999999,"extra":{"googlePlaceId":"ChIJD-XGzLZXwokRTw5UpowEXV8","confidence":0.5,"premise":null,"subpremise":null,"neighborhood":"Secaucus","establishment":null},"administrativeLevels":{"level2long":"Hudson County","level2short":"Hudson County","level1long":"New Jersey","level1short":"NJ"},"city":"Secaucus","country":"United States","countryCode":"US","provider":"google"}],[{"formattedAddress":"New York, NY, USA","latitude":40.7127753,"longitude":-74.0059728,"extra":{"googlePlaceId":"ChIJOwg_06VPwokRYv534QaPC8g","confidence":0.5,"premise":null,"subpremise":null,"neighborhood":"New York","establishment":null},"administrativeLevels":{"level1long":"New York","level1short":"NY"},"city":"New York","country":"United States","countryCode":"US","provider":"google"}]]})
+    wrapper.setState({ markersData: data.markers})
+    const div = wrapper.find(".location-value");
+    expect(div.length).toBeGreaterThan(0);
+    appRender().unmount();
+  });
+  it("CRUD: Communicates with the backend to saveMarker", () =>{
+    const wrapper = shallow(<Home />).dive();
+    const changeMarker = jest.spyOn(wrapper.instance(), 'changeMarker');
+    wrapper.instance().saveMarker();
+    expect(changeMarker).toHaveBeenCalled()
+  })
+  it("CRUD: Communicates with the backend to deleteMarker", () =>{
+    const wrapper = shallow(<Home />).dive();
+    const changeMarker = jest.spyOn(wrapper.instance(), 'changeMarker');
+    wrapper.instance().deleteMarker([{formattedAddress: "New York"}]);
+    expect(changeMarker).toHaveBeenCalled()
+  })
+  it("Toggles text field when the edit button is pressed" ,() =>{
+    const wrapper = shallow(<Home />).dive();
+    wrapper.instance().toggleTextField(3);
+    expect(wrapper.state().index).toEqual(3)
+  })
 });
