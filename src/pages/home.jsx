@@ -10,6 +10,7 @@ import IconButton from "@material-ui/core/IconButton";
 import Paper from "@material-ui/core/Paper";
 import { withStyles } from "@material-ui/styles";
 import Location from "../common/location/location";
+import Error from "../common/error/error";
 const styles = theme => ({
   root: {
     padding: "2px 4px",
@@ -42,7 +43,9 @@ class Home extends Component {
       map: {},
       markers: [],
       markersData: [],
-      index: ""
+      index: "",
+      Error: {},
+      Errored: false
     };
 
     // Bind Functions
@@ -81,12 +84,16 @@ class Home extends Component {
     fetch(url)
       .then(function(response) {
         if (response.status !== 200) {
-          console.log("Looks like there was a problem. Status Code: " + response.status);
-          return;
+          self.setState({ Errored: true });
         }
         response.json().then(function(data) {
-          self.addMarker(data);
-          self.saveMarker(data);
+          if (data.Error) {
+            self.setState({ Error: data });
+          } else {
+            self.setState({ Error: {}, Errored: false });
+            self.addMarker(data);
+            self.saveMarker(data);
+          }
         });
       })
       .catch(function(err) {
@@ -101,11 +108,11 @@ class Home extends Component {
   geocode() {
     let addressObject = this.autocomplete.getPlace();
     let address = addressObject.address_components;
-    if(address){
-    this.geocodeAPI(
-      "/geocode?address=" + address[0].long_name + ", " + address[1].long_name + ", " + address[2].long_name
-    );}
-    else{
+    if (address) {
+      this.geocodeAPI(
+        "/geocode?address=" + address[0].long_name + ", " + address[1].long_name + ", " + address[2].long_name
+      );
+    } else {
       this.changeMarker("/editMarker", {
         edit: addressObject.name
       });
@@ -113,19 +120,21 @@ class Home extends Component {
   }
 
   addMarker(data) {
-    let latlng = { lat: data[0].latitude, lng: data[0].longitude };
-    this.marker = new window.google.maps.Marker({
-      position: latlng,
-      map: this.state.map,
-      title: data[0].formattedAddress
-    });
-    this.state.map.setCenter(latlng);
-    var bounds = new window.google.maps.LatLngBounds();
-    this.setState({ markers: [...this.state.markers, this.marker] });
-    for (var i = 0; i < this.state.markers.length; i++) {
-      bounds.extend(this.state.markers[i].getPosition());
+    if (data[0]) {
+      let latlng = { lat: data[0].latitude, lng: data[0].longitude };
+      this.marker = new window.google.maps.Marker({
+        position: latlng,
+        map: this.state.map,
+        title: data[0].formattedAddress
+      });
+      this.state.map.setCenter(latlng);
+      var bounds = new window.google.maps.LatLngBounds();
+      this.setState({ markers: [...this.state.markers, this.marker] });
+      for (var i = 0; i < this.state.markers.length; i++) {
+        bounds.extend(this.state.markers[i].getPosition());
+      }
+      this.state.map.fitBounds(bounds);
     }
-    this.state.map.fitBounds(bounds);
   }
 
   getAllMarkers() {
@@ -134,18 +143,23 @@ class Home extends Component {
     fetch("/getMarkers")
       .then(function(response) {
         if (response.status !== 200) {
-          console.log("Looks like there was a problem. Status Code: " + response.status);
-          return;
+          self.setState({ Errored: true });
         }
         response.json().then(function(data) {
-          let markers = data.markers;
-          self.setState({ markersData: markers }, () => {
-            if (self.state.markersData.length === 0) {
-              self.setupMap();
+          if (data.Error) {
+            self.setState({ Error: data });
+            self.setupMap();
+          } else {
+            self.setState({ Error: data, Errored: false });
+            let markers = data.markers;
+            self.setState({ markersData: markers }, () => {
+              if (self.state.markersData.length === 0) {
+                self.setupMap();
+              }
+            });
+            for (let x in markers) {
+              self.addMarker(markers[x]);
             }
-          });
-          for (let x in markers) {
-            self.addMarker(markers[x]);
           }
         });
       })
@@ -202,63 +216,67 @@ class Home extends Component {
               <div id="map" className="map" />
             </Grid>
             <Grid item xs={12} md={6}>
-              <div id="locations" className="locations">
-                <Grid container spacing={2}>
-                  {this.state.markersData.length > 0 &&
-                    this.state.markersData.map((marker, i) => {
-                      return (
-                        <Grid item xs={12} md={6} key={i}>
-                          <Paper className={classes.paper}>
-                            <Grid container spacing={2}>
-                              <Grid item xs={12} sm container>
-                                <Grid item xs container direction="column" spacing={2}>
-                                  <Grid item xs>
-                                    {this.state.index !== i ? (
-                                      <Location marker={marker} />
-                                    ) : (
-                                      <form
-                                        onSubmit={this.editMarker(marker)}
-                                        className={classes.container}
-                                        noValidate
-                                        autoComplete="off">
-                                        <TextField
-                                          label="Edit location"
-                                          className={classes.textField}
-                                          margin="normal"
-                                          id="autocomplete-2"
-                                        />
-                                      </form>
-                                    )}
-                                  </Grid>
-                                  <Grid item className={classes.removebutton}>
-                                    <Grid container alignItems="flex-end">
-                                      <Typography variant="body2" style={{ cursor: "pointer" }}>
-                                        <Button className={classes.button} onClick={() => this.deleteMarker(marker)}>
-                                          Remove
-                                        </Button>
-                                      </Typography>
+              {this.state.Errored ? (
+                <Error Error={this.state.Error} />
+              ) : (
+                <div id="locations" className="locations">
+                  <Grid container spacing={2}>
+                    {this.state.markersData.length > 0 &&
+                      this.state.markersData.map((marker, i) => {
+                        return (
+                          <Grid item xs={12} md={6} key={i}>
+                            <Paper className={classes.paper}>
+                              <Grid container spacing={2}>
+                                <Grid item xs={12} sm container>
+                                  <Grid item xs container direction="column" spacing={2}>
+                                    <Grid item xs>
+                                      {this.state.index !== i ? (
+                                        <Location marker={marker} />
+                                      ) : (
+                                        <form
+                                          onSubmit={this.editMarker(marker)}
+                                          className={classes.container}
+                                          noValidate
+                                          autoComplete="off">
+                                          <TextField
+                                            label="Edit location"
+                                            className={classes.textField}
+                                            margin="normal"
+                                            id="autocomplete-2"
+                                          />
+                                        </form>
+                                      )}
+                                    </Grid>
+                                    <Grid item className={classes.removebutton}>
+                                      <Grid container alignItems="flex-end">
+                                        <Typography variant="body2" style={{ cursor: "pointer" }}>
+                                          <Button className={classes.button} onClick={() => this.deleteMarker(marker)}>
+                                            Remove
+                                          </Button>
+                                        </Typography>
+                                      </Grid>
                                     </Grid>
                                   </Grid>
-                                </Grid>
-                                <Grid item>
-                                  <IconButton
-                                    aria-label="edit location"
-                                    aria-controls="edit-icon"
-                                    aria-haspopup="true"
-                                    color="inherit"
-                                    className={classes.iconButton}
-                                    onClick={() => this.toggleTextField(i)}>
-                                    <CreateIcon />
-                                  </IconButton>
+                                  <Grid item>
+                                    <IconButton
+                                      aria-label="edit location"
+                                      aria-controls="edit-icon"
+                                      aria-haspopup="true"
+                                      color="inherit"
+                                      className={classes.iconButton}
+                                      onClick={() => this.toggleTextField(i)}>
+                                      <CreateIcon />
+                                    </IconButton>
+                                  </Grid>
                                 </Grid>
                               </Grid>
-                            </Grid>
-                          </Paper>
-                        </Grid>
-                      );
-                    })}
-                </Grid>
-              </div>
+                            </Paper>
+                          </Grid>
+                        );
+                      })}
+                  </Grid>
+                </div>
+              )}
             </Grid>
           </Grid>
         </div>
