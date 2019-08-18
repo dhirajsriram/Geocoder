@@ -11,6 +11,7 @@ import Paper from "@material-ui/core/Paper";
 import { withStyles } from "@material-ui/styles";
 import Location from "../common/location/location";
 import Error from "../common/error/error";
+import CloseIcon from "@material-ui/icons/Close";
 const styles = theme => ({
   root: {
     padding: "2px 4px",
@@ -47,18 +48,13 @@ class Home extends Component {
       Error: {},
       Errored: false
     };
-
-    // Bind Functions
-    this.geocode = this.geocode.bind(this);
-    this.addMarker = this.addMarker.bind(this);
-    this.getAllMarkers = this.getAllMarkers.bind(this);
-    this.toggleTextField = this.toggleTextField.bind(this);
   }
 
   componentDidMount() {
     var options = { types: ["(cities)"] };
     this.setupMap();
     this.setState({ map: this.map });
+    if(window.google){
     let self = this;
     window.google.maps.event.addListener(this.map, "click", function(event) {
       var latitude = event.latLng.lat();
@@ -70,16 +66,18 @@ class Home extends Component {
     this.getAllMarkers();
     this.autocomplete.addListener("place_changed", this.geocode);
   }
+  }
 
-  setupMap() {
+  setupMap = () => {
+    if(window.google){
     this.map = new window.google.maps.Map(document.getElementById("map"), {
       center: new window.google.maps.LatLng(51.1657, 10.4515),
       zoom: 8
     });
-    this.setState({ map: this.map });
+    this.setState({ map: this.map });}
   }
 
-  geocodeAPI(url) {
+  geocodeAPI = (url) => {
     let self = this;
     fetch(url)
       .then(function(response) {
@@ -101,11 +99,11 @@ class Home extends Component {
       });
   }
 
-  reverseGeocode(lat, lon) {
+  reverseGeocode = (lat, lon) => {
     this.geocodeAPI("/reverseGeocode?lat=" + lat + "&lon=" + lon);
   }
 
-  geocode() {
+  geocode = () => {
     let addressObject = this.autocomplete.getPlace();
     let address = addressObject.address_components;
     if (address) {
@@ -119,7 +117,7 @@ class Home extends Component {
     }
   }
 
-  addMarker(data) {
+  addMarker = (data) => {
     if (data[0]) {
       let latlng = { lat: data[0].latitude, lng: data[0].longitude };
       this.marker = new window.google.maps.Marker({
@@ -137,7 +135,7 @@ class Home extends Component {
     }
   }
 
-  getAllMarkers() {
+  getAllMarkers = () => {
     let self = this;
     this.setState({ markers: [] });
     fetch("/getMarkers")
@@ -148,6 +146,7 @@ class Home extends Component {
         response.json().then(function(data) {
           if (data.Error) {
             self.setState({ Error: data });
+            self.setState({ markersData: [] });
             self.setupMap();
           } else {
             self.setState({ Error: data, Errored: false });
@@ -168,7 +167,7 @@ class Home extends Component {
       });
   }
 
-  changeMarker(url, data) {
+  changeMarker = (url, data) => {
     fetch(url, {
       method: "POST", // or 'PUT'
       body: JSON.stringify(data), // data can be `string` or {object}!
@@ -177,16 +176,24 @@ class Home extends Component {
       }
     })
       .then(res => res.json())
-      .then(response => this.getAllMarkers())
-      .catch(error => console.error("Error:", error));
+      .then(response => {
+        if (response.Error) {
+          this.setState({ Errored: true, Error: response });
+        } else {
+          this.getAllMarkers();
+        }
+      })
+      .catch(error => {
+        console.log(error);
+      });
     this.setState({ index: "" });
   }
 
-  saveMarker(data) {
+  saveMarker = (data) => {
     this.changeMarker("/saveMarker", { marker: data });
   }
 
-  editMarker(data) {
+  editMarker = (data) => {
     return event => {
       event.preventDefault();
       event.persist();
@@ -197,11 +204,11 @@ class Home extends Component {
     };
   }
 
-  deleteMarker(data) {
+  deleteMarker = (data) => {
     this.changeMarker("/deleteMarker", { marker: data[0].formattedAddress });
   }
 
-  toggleTextField(i) {
+  toggleTextField = (i) => {
     this.setState({ index: i });
   }
 
@@ -217,7 +224,15 @@ class Home extends Component {
             </Grid>
             <Grid item xs={12} md={6}>
               {this.state.Errored ? (
-                <Error Error={this.state.Error} />
+                <div className="error">
+                  <React.Fragment>
+                    <div className="close-button">
+                    <IconButton className="close-btn" onClick={() => this.setState({ Errored: !this.state.Errored })}>
+                      <CloseIcon align="right" />
+                    </IconButton></div>
+                    <Error Error={this.state.Error} />
+                  </React.Fragment>
+                </div>
               ) : (
                 <div id="locations" className="locations">
                   <Grid container spacing={2}>

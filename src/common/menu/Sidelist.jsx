@@ -23,7 +23,7 @@ const sideList = props => (
       <Divider />
       <Divider />  
       <List>
-           <a className="default-text" href={"https://github.com/dhirajsriram/Healthdex"}>
+           <a className="default-text" href={"https://github.com/dhirajsriram/Geocoder"}>
           <ListItem button>
             <ListItemIcon><InfoIcon/></ListItemIcon>
             <ListItemText primary={"About"} />
