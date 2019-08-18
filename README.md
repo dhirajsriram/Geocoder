@@ -5,38 +5,30 @@
 
 A React application which handles the users request and places markers on the google maps widget. The user has the ability to add create delete and edit the markers. [Geocoder-node](https://github.com/dhirajsriram/geocoder-node) application serves as the backend to fetch the geocode, reverse geocode and also handles all the CRUD operations related to the application.
 
-## Development
+## Installation
 
-Kindly do an npm install to install the required packages for the web application. Following are the libraries that are used
+Kindly do an npm install at the root directory of both the applications to install the required packages. Following are the libraries that are used
 - React v16.9.0
 - Material-ui v0.20.2
+- Enzyme v3.10.0
+- supertest v4.0.2
 
 ```
 npm install 
 ```
 
-### `npm start`
+## Serving Locally
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Once the packages have been installed you may serve both the application locally you may run `npm start` on the root directory of both the applications to serve them locally. Following are the ports the application run on
+- Front-end :  [http://localhost:3000](http://localhost:3000)
+- Back-end :  [http://localhost:8081](http://localhost:8081)
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+**The backend and the frontend applications must be served simultaneously to persist data**
 
-### `npm test`
+### Scripts
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+`npm run test` - Runs the test scrips on on the specific application
+`npm run build` - Builds a minified version of the frontend application.It correctly bundles React in production mode and optimizes the build for the best performance.
 
 ## Architecture
 
@@ -71,6 +63,10 @@ The marker list displays the data of the markers that are placed on the map. Mar
 - Edit a marker.
 
 There are idividual API's to handle the CRUD operations in the backend.
+
+## Design
+## Error Handling
+## Configuration
 
 
 
