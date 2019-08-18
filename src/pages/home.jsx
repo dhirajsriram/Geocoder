@@ -9,6 +9,7 @@ import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
 import Paper from "@material-ui/core/Paper";
 import { withStyles } from "@material-ui/styles";
+import Location from "../common/location/location";
 const styles = theme => ({
   root: {
     padding: "2px 4px",
@@ -283,25 +284,7 @@ class Home extends Component {
                                 >
                                   <Grid item xs>
                                     {this.state.index !== i ? (
-                                      <Grid>
-                                        <Typography
-                                          variant="h5"
-                                          fontWeight="fontWeightBold"
-                                          component="h5"
-                                          gutterBottom
-                                        >
-                                          {marker[0].formattedAddress
-                                            ? marker[0].formattedAddress
-                                            : ""}
-                                        </Typography>
-                                        <Typography
-                                          variant="body2"
-                                          gutterBottom
-                                        >
-                                          Latitude : {marker[0].latitude} <br />
-                                          longitude : {marker[0].longitude}
-                                        </Typography>
-                                      </Grid>
+                                      <Location marker={marker}></Location>
                                     ) : (
                                       <form
                                         onSubmit={
