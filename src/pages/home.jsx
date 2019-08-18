@@ -55,7 +55,6 @@ class Home extends Component {
     this.setupMap();
     this.setState({ map: this.map });
     if(window.google){
-    let self = this;
     this.autocomplete = new window.google.maps.places.Autocomplete(document.getElementById("autocomplete"), options);
     this.autocomplete.setFields(["address_components"]);
     this.getAllMarkers();
