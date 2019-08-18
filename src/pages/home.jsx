@@ -46,7 +46,7 @@ class Home extends Component {
     };
 
     // Bind Functions
-    this.handlePlaceSelect = this.handlePlaceSelect.bind(this);
+    this.geocode = this.geocode.bind(this);
     this.addMarker = this.addMarker.bind(this);
     this.getAllMarkers = this.getAllMarkers.bind(this);
     this.toggleTextField = this.toggleTextField.bind(this);
@@ -65,18 +65,18 @@ class Home extends Component {
     this.autocomplete = new window.google.maps.places.Autocomplete(document.getElementById("autocomplete"), options);
     this.autocomplete.setFields(["address_components"]);
     this.getAllMarkers();
-    this.autocomplete.addListener("place_changed", this.handlePlaceSelect);
+    this.autocomplete.addListener("place_changed", this.geocode);
   }
 
   setupMap() {
     this.map = new window.google.maps.Map(document.getElementById("map"), {
-      center: this.state.markersData.length === 0 ? new window.google.maps.LatLng(51.1657, 10.4515):null,
+      center: new window.google.maps.LatLng(51.1657, 10.4515),
       zoom: 8
     });
-    this.setState({map:this.map})
+    this.setState({ map: this.map });
   }
 
-  geocode(url){
+  geocodeAPI(url) {
     let self = this;
     fetch(url)
       .then(function(response) {
@@ -95,14 +95,21 @@ class Home extends Component {
   }
 
   reverseGeocode(lat, lon) {
-    this.geocode("/reverseGeocode?lat=" + lat + "&lon=" + lon)
+    this.geocodeAPI("/reverseGeocode?lat=" + lat + "&lon=" + lon);
   }
 
-  handlePlaceSelect() {
+  geocode() {
     let addressObject = this.autocomplete.getPlace();
     let address = addressObject.address_components;
-    console.log(address);
-    this.geocode("/geocode?address=" + address[0].long_name + ", " + address[1].long_name + ", " + address[2].long_name)
+    if(address){
+    this.geocodeAPI(
+      "/geocode?address=" + address[0].long_name + ", " + address[1].long_name + ", " + address[2].long_name
+    );}
+    else{
+      this.changeMarker("/editMarker", {
+        edit: addressObject.name
+      });
+    }
   }
 
   addMarker(data) {
@@ -130,12 +137,12 @@ class Home extends Component {
           console.log("Looks like there was a problem. Status Code: " + response.status);
           return;
         }
-        // Examine the text in the response
-
         response.json().then(function(data) {
           let markers = data.markers;
-          self.setState({ markersData: markers },() =>{
-            self.setupMap()
+          self.setState({ markersData: markers }, () => {
+            if (self.state.markersData.length === 0) {
+              self.setupMap();
+            }
           });
           for (let x in markers) {
             self.addMarker(markers[x]);
@@ -147,8 +154,7 @@ class Home extends Component {
       });
   }
 
-  changeMarker(url,data){
-    
+  changeMarker(url, data) {
     fetch(url, {
       method: "POST", // or 'PUT'
       body: JSON.stringify(data), // data can be `string` or {object}!
@@ -157,28 +163,28 @@ class Home extends Component {
       }
     })
       .then(res => res.json())
-      .then(response =>  this.getAllMarkers())
+      .then(response => this.getAllMarkers())
       .catch(error => console.error("Error:", error));
     this.setState({ index: "" });
   }
 
   saveMarker(data) {
-    this.changeMarker("/saveMarker",{ marker: data })
+    this.changeMarker("/saveMarker", { marker: data });
   }
 
   editMarker(data) {
     return event => {
       event.preventDefault();
       event.persist();
-      this.changeMarker("/editMarker",{
+      this.changeMarker("/editMarker", {
         marker: data[0].formattedAddress,
         edit: event.target[0].value
-      })
-    }
+      });
+    };
   }
 
   deleteMarker(data) {
-    this.changeMarker("/deleteMarker",{ marker: data[0].formattedAddress })
+    this.changeMarker("/deleteMarker", { marker: data[0].formattedAddress });
   }
 
   toggleTextField(i) {
