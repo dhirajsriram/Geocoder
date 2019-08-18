@@ -56,11 +56,6 @@ class Home extends Component {
     this.setState({ map: this.map });
     if(window.google){
     let self = this;
-    window.google.maps.event.addListener(this.map, "click", function(event) {
-      var latitude = event.latLng.lat();
-      var longitude = event.latLng.lng();
-      self.reverseGeocode(latitude, longitude);
-    });
     this.autocomplete = new window.google.maps.places.Autocomplete(document.getElementById("autocomplete"), options);
     this.autocomplete.setFields(["address_components"]);
     this.getAllMarkers();
@@ -69,10 +64,16 @@ class Home extends Component {
   }
 
   setupMap = () => {
+    let self = this
     if(window.google){
     this.map = new window.google.maps.Map(document.getElementById("map"), {
       center: new window.google.maps.LatLng(51.1657, 10.4515),
       zoom: 8
+    });
+    window.google.maps.event.addListener(this.map, "click", function(event) {
+      var latitude = event.latLng.lat();
+      var longitude = event.latLng.lng();
+      self.reverseGeocode(latitude, longitude);
     });
     this.setState({ map: this.map });}
   }
@@ -180,6 +181,9 @@ class Home extends Component {
         if (response.Error) {
           this.setState({ Errored: true, Error: response });
         } else {
+          if(url === "/editMarker"){
+            this.setupMap();
+          }
           this.getAllMarkers();
         }
       })
