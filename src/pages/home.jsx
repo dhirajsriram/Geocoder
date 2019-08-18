@@ -53,50 +53,37 @@ class Home extends Component {
   }
 
   componentDidMount() {
-    var options = {
-      types: ["(cities)"]
-    };
-
-    this.myLatlng = new window.google.maps.LatLng(51.1657, 10.4515);
-    this.map = new window.google.maps.Map(document.getElementById("map"), {
-      center: this.myLatlng,
-      zoom: 8
-    });
-
-    this.setState({
-      map: this.map
-    });
-
+    var options = { types: ["(cities)"] };
+    this.setupMap();
+    this.setState({ map: this.map });
     let self = this;
     window.google.maps.event.addListener(this.map, "click", function(event) {
       var latitude = event.latLng.lat();
       var longitude = event.latLng.lng();
       self.reverseGeocode(latitude, longitude);
     });
-
-    this.autocomplete = new window.google.maps.places.Autocomplete(
-      document.getElementById("autocomplete"),
-      options
-    );
-
+    this.autocomplete = new window.google.maps.places.Autocomplete(document.getElementById("autocomplete"), options);
     this.autocomplete.setFields(["address_components"]);
     this.getAllMarkers();
     this.autocomplete.addListener("place_changed", this.handlePlaceSelect);
   }
 
-  reverseGeocode(lat, lon) {
-    // Extract City From Address Object
+  setupMap() {
+    this.map = new window.google.maps.Map(document.getElementById("map"), {
+      center: this.state.markersData.length === 0 ? new window.google.maps.LatLng(51.1657, 10.4515):null,
+      zoom: 8
+    });
+    this.setState({map:this.map})
+  }
+
+  geocode(url){
     let self = this;
-    fetch("/reverseGeocode?lat=" + lat + "&lon=" + lon)
+    fetch(url)
       .then(function(response) {
         if (response.status !== 200) {
-          console.log(
-            "Looks like there was a problem. Status Code: " + response.status
-          );
+          console.log("Looks like there was a problem. Status Code: " + response.status);
           return;
         }
-        // Examine the text in the response
-
         response.json().then(function(data) {
           self.addMarker(data);
           self.saveMarker(data);
@@ -105,43 +92,20 @@ class Home extends Component {
       .catch(function(err) {
         console.log("Fetch Error :-S", err);
       });
+  }
+
+  reverseGeocode(lat, lon) {
+    this.geocode("/reverseGeocode?lat=" + lat + "&lon=" + lon)
   }
 
   handlePlaceSelect() {
-    // Extract City From Address Object
     let addressObject = this.autocomplete.getPlace();
     let address = addressObject.address_components;
-    let self = this;
     console.log(address);
-    fetch(
-      "/geocode?address=" +
-        address[0].long_name +
-        ", " +
-        address[1].long_name +
-        ", " +
-        address[2].long_name
-    )
-      .then(function(response) {
-        if (response.status !== 200) {
-          console.log(
-            "Looks like there was a problem. Status Code: " + response.status
-          );
-          return;
-        }
-        // Examine the text in the response
-
-        response.json().then(function(data) {
-          self.addMarker(data);
-          self.saveMarker(data);
-        });
-      })
-      .catch(function(err) {
-        console.log("Fetch Error :-S", err);
-      });
+    this.geocode("/geocode?address=" + address[0].long_name + ", " + address[1].long_name + ", " + address[2].long_name)
   }
 
   addMarker(data) {
-    
     let latlng = { lat: data[0].latitude, lng: data[0].longitude };
     this.marker = new window.google.maps.Marker({
       position: latlng,
@@ -150,29 +114,29 @@ class Home extends Component {
     });
     this.state.map.setCenter(latlng);
     var bounds = new window.google.maps.LatLngBounds();
-    this.setState({markers : [...this.state.markers,this.marker]})
+    this.setState({ markers: [...this.state.markers, this.marker] });
     for (var i = 0; i < this.state.markers.length; i++) {
-      bounds.extend(this.state.markers[i].getPosition())
+      bounds.extend(this.state.markers[i].getPosition());
     }
     this.state.map.fitBounds(bounds);
   }
 
   getAllMarkers() {
     let self = this;
-    this.setState({markers:[]})
+    this.setState({ markers: [] });
     fetch("/getMarkers")
       .then(function(response) {
         if (response.status !== 200) {
-          console.log(
-            "Looks like there was a problem. Status Code: " + response.status
-          );
+          console.log("Looks like there was a problem. Status Code: " + response.status);
           return;
         }
         // Examine the text in the response
 
         response.json().then(function(data) {
           let markers = data.markers;
-          self.setState({ markersData: markers });
+          self.setState({ markersData: markers },() =>{
+            self.setupMap()
+          });
           for (let x in markers) {
             self.addMarker(markers[x]);
           }
@@ -183,72 +147,38 @@ class Home extends Component {
       });
   }
 
-  saveMarker(data) {
-    fetch("/saveMarker", {
+  changeMarker(url,data){
+    
+    fetch(url, {
       method: "POST", // or 'PUT'
-      body: JSON.stringify({ marker: data }), // data can be `string` or {object}!
+      body: JSON.stringify(data), // data can be `string` or {object}!
       headers: {
         "Content-Type": "application/json"
       }
     })
       .then(res => res.json())
-      .then(response => console.log(JSON.stringify(response)))
+      .then(response =>  this.getAllMarkers())
       .catch(error => console.error("Error:", error));
-    this.getAllMarkers();
     this.setState({ index: "" });
+  }
+
+  saveMarker(data) {
+    this.changeMarker("/saveMarker",{ marker: data })
   }
 
   editMarker(data) {
     return event => {
       event.preventDefault();
       event.persist();
-      this.myLatlng = new window.google.maps.LatLng(51.1657, 10.4515);
-      this.setState({ index: "" });
-      this.setState({
-        map: new window.google.maps.Map(document.getElementById("map"), {
-          zoom: 8
-        })
-      });
-      fetch("/editMarker", {
-        method: "POST", // or 'PUT'
-        body: JSON.stringify({
-          marker: data[0].formattedAddress,
-          edit: event.target[0].value
-        }), // data can be `string` or {object}!
-        headers: {
-          "Content-Type": "application/json"
-        }
+      this.changeMarker("/editMarker",{
+        marker: data[0].formattedAddress,
+        edit: event.target[0].value
       })
-        .then(res => res.json())
-        .then(response => {
-          this.getAllMarkers();
-        })
-        .catch(error => console.error("Error:", error));
-        
-       
-    };
+    }
   }
 
   deleteMarker(data) {
-    let self = this;
-    fetch("/deleteMarker", {
-      method: "POST", // or 'PUT'
-      body: JSON.stringify({ marker: data[0].formattedAddress }), // data can be `string` or {object}!
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
-      .then(res => res.json())
-      .then(response => self.getAllMarkers())
-      .catch(error => console.error("Error:", error));
-    
-    this.myLatlng = new window.google.maps.LatLng(51.1657, 10.4515);
-    this.setState({ index: "" });
-    this.setState({
-      map: new window.google.maps.Map(document.getElementById("map"), {
-        zoom: 8
-      })
-    });
+    this.changeMarker("/deleteMarker",{ marker: data[0].formattedAddress })
   }
 
   toggleTextField(i) {
@@ -263,7 +193,7 @@ class Home extends Component {
           <Search />
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-            <div id="map" className="map" />
+              <div id="map" className="map" />
             </Grid>
             <Grid item xs={12} md={6}>
               <div id="locations" className="locations">
@@ -275,25 +205,16 @@ class Home extends Component {
                           <Paper className={classes.paper}>
                             <Grid container spacing={2}>
                               <Grid item xs={12} sm container>
-                                <Grid
-                                  item
-                                  xs
-                                  container
-                                  direction="column"
-                                  spacing={2}
-                                >
+                                <Grid item xs container direction="column" spacing={2}>
                                   <Grid item xs>
                                     {this.state.index !== i ? (
-                                      <Location marker={marker}></Location>
+                                      <Location marker={marker} />
                                     ) : (
                                       <form
-                                        onSubmit={
-                                          this.editMarker(marker)
-                                        }
+                                        onSubmit={this.editMarker(marker)}
                                         className={classes.container}
                                         noValidate
-                                        autoComplete="off"
-                                      >
+                                        autoComplete="off">
                                         <TextField
                                           label="Edit location"
                                           className={classes.textField}
@@ -305,16 +226,8 @@ class Home extends Component {
                                   </Grid>
                                   <Grid item className={classes.removebutton}>
                                     <Grid container alignItems="flex-end">
-                                      <Typography
-                                        variant="body2"
-                                        style={{ cursor: "pointer" }}
-                                      >
-                                        <Button
-                                          className={classes.button}
-                                          onClick={() =>
-                                            this.deleteMarker(marker)
-                                          }
-                                        >
+                                      <Typography variant="body2" style={{ cursor: "pointer" }}>
+                                        <Button className={classes.button} onClick={() => this.deleteMarker(marker)}>
                                           Remove
                                         </Button>
                                       </Typography>
@@ -328,8 +241,7 @@ class Home extends Component {
                                     aria-haspopup="true"
                                     color="inherit"
                                     className={classes.iconButton}
-                                    onClick={() => this.toggleTextField(i)}
-                                  >
+                                    onClick={() => this.toggleTextField(i)}>
                                     <CreateIcon />
                                   </IconButton>
                                 </Grid>
