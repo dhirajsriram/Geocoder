@@ -1,33 +1,39 @@
-.App {
-  text-align: center;
+.geocoder-logo {
+  margin-top: 15px;
+}
+.default-text {
+  text-decoration: none;
+  color: inherit;
+}
+.Home {
+  margin: auto;
+  margin-top: 80px;
+  padding: 20px;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 40vmin;
-  pointer-events: none;
+.MuiPaper-elevation1 {
+  box-shadow: 0px 1px 10px 1px rgba(0, 0, 0, 0.2),
+    0px 1px 1px 1px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12) !important;
 }
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.map {
+  margin-top: 20px;
+  min-height: 500px;
+  height:100%;
+  border-radius: 20px;
 }
-
-.App-link {
-  color: #61dafb;
+.MuiTypography-h5{
+  font-weight: bold !important;
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+.locations{
+  margin-top: 20px;
+}
+.makeStyles-search-114 {
+  margin: 0px !important;
+}
+@media screen and (max-width: 768px) {
+  .Home {
+    width: 100%;
+    margin: auto;
+    margin-top: 60px;
   }
 }
