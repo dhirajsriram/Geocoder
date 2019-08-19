@@ -5,6 +5,8 @@
 
 A React application which handles the user's request and places markers on the google maps widget. The user can add create delete and edit the markers. [Geocoder-node](https://github.com/dhirajsriram/geocoder-node) application serves as the backend to fetch the geocode, reverse geocode and also handles all the CRUD operations related to the application.
 
+**Live version of the app can be found [here](http://ec2-18-223-164-119.us-east-2.compute.amazonaws.com/)**
+
 ## Installation
 
 Kindly do an npm install at the root directory of both the applications to install the required packages. Following are the libraries that are used in front-end.
@@ -35,6 +37,12 @@ Once the packages have been installed you may serve both the applications locall
 
 The front-end and back-end application for geocoder are closely integrated. Any operation related to markers are handled in the back-end which is immediately fetched from the front-end to have the latest version of the data available at all times. Following is an integrated architecture of the applications
 <p align="center"><img src="/geocoder.png"></p>
+
+## Deployment
+
+- The application has been deployed on AWS to an **EC2** instance.
+- The static files of the website have been copied to the apache's root folder which hosts the application
+- **Apache** has been configured to proxy request from the frontend to the port 8081 of the domain.
 
 ## Description
 
