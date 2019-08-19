@@ -63,6 +63,26 @@ The marker list displays the data of the markers that are placed on the map. Mar
 - Remove a marker
 - Edit a marker.
 
+```js
+addMarker = (data) => {
+    if (data[0]) {
+      let latlng = { lat: data[0].latitude, lng: data[0].longitude };
+      this.marker = new window.google.maps.Marker({
+        position: latlng,
+        map: this.state.map,
+        title: data[0].formattedAddress
+      });
+      this.state.map.setCenter(latlng);
+      var bounds = new window.google.maps.LatLngBounds();
+      this.setState({ markers: [...this.state.markers, this.marker] });
+      for (var i = 0; i < this.state.markers.length; i++) {
+        bounds.extend(this.state.markers[i].getPosition());
+      }
+      this.state.map.fitBounds(bounds);
+    }
+  }
+```
+
 There are individual API's to handle the CRUD operations in the backend.
 
 ## Design
