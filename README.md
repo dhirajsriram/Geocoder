@@ -3,7 +3,7 @@
 
 ## Abstract
 
-**``[http://ec2-18-223-164-119.us-east-2.compute.amazonaws.com/](http://ec2-18-223-164-119.us-east-2.compute.amazonaws.com/)``**
+**[http://ec2-18-223-164-119.us-east-2.compute.amazonaws.com/](http://ec2-18-223-164-119.us-east-2.compute.amazonaws.com/)**
 
 A React application which handles the user's request and places markers on the google maps widget. The user can add create delete and edit the markers. [Geocoder-node](https://github.com/dhirajsriram/geocoder-node) application serves as the backend to fetch the geocode, reverse geocode and also handles all the CRUD operations related to the application.
 
