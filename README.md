@@ -7,7 +7,7 @@ A React application which handles the user's request and places markers on the g
 
 ## Installation
 
-Kindly do an npm install at the root directory of both the applications to install the required packages. Following are the libraries that are used
+Kindly do an npm install at the root directory of both the applications to install the required packages. Following are the libraries that are used in front-end.
 - React v16.9.0
 - Material-UI v0.20.2
 
@@ -44,7 +44,7 @@ The application works on a single page, there are two segments in the page
 
 ### Map Widget
 
-The map widget is loaded from the google maps script tag
+The map widget is loaded from the google maps API's CDN.
 
 ```html
 <script src="https://maps.googleapis.com/maps/api/js?key=API_KEY&libraries=places&sensor=false"></script>
@@ -58,7 +58,7 @@ The map widget also enables the various interactions that the user makes with th
 
 ### Marker List
 
-The marker list displays the data of the markers that are placed on the map. Marker list is constantly updated with the data from the backend. The user can do the following with the marker list.
+The marker list displays the data of the markers that are placed on the map. Marker list is constantly updated with the data from the backend. The user can do the following with the markers.
 - Add a marker
 - Remove a marker
 - Edit a marker.
@@ -105,12 +105,12 @@ The application follows a class-based approach. The application manages states t
 
 ### UX Design
 
-The application strongly follows a Material design approach. Elements shown to user represent lifelike materials like paper which is something that a user can connect with very easily.
+The application strongly follows a Material design approach. Elements shown to user represent life-like materials like paper which is something that a user can connect with very easily.
 
-The application was designed with a lifelike map in mind. The Map on the left represents a canvas of a map and the markers on the right represent the marking made on the canvas.
+The application was designed with a map in mind. The Map on the left represents a canvas of a map and the markers on the right represent the marking made on the canvas.
 
 ## Error Handling
 
-The application handles errors gracefully. The application checks for the response status. If the status is not 200 an **Error component** is shown to the user with the data from the response.
+The application handles errors gracefully. The application checks for the response status. If the status is not 200 an **Error component** is shown to the user with the corresponding data from the response.
 
 
